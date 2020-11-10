@@ -2,7 +2,7 @@
 import sys
 from driver import Driver
 
-def main(argv, argc):
+def main(argv: list, argc: int) -> None:
 	"""
 	Put argv, argc here in case we wanna pass anything in via cmd line
 	"""
