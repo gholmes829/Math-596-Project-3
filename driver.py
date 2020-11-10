@@ -2,6 +2,8 @@
 
 """
 import numpy as np
+from itertools import product
+from core.rungekutta import rk
 # import stuff from core here
 #from core.module import ...
 
@@ -11,7 +13,7 @@ class Driver:
 		"""
 		Has attributes like number of oberserved vars and stuf like that
 		"""
-		pass
+		self.observations = np.array(list(product([0, 1], repeat=3)))[1:]  # combinations of [1, 0] excluding [0, 0, 0]
 
 	def run(self) -> None:
 		"""
@@ -25,3 +27,5 @@ class Driver:
 		Returns root mean squared error.
 		"""
 		return np.sqrt(np.mean((observed-targets)**2))
+
+
