@@ -7,54 +7,79 @@ rho = 28.0
 sigma = 10.0
 beta = 8.0 / 3.0
 
-def f(state, t):
-    x, y, z = state  # Unpack the state vector
-    return sigma * (y - x), x * (rho - z) - y, x * y - beta * z  # Derivatives
-
-state0 = [1.0, 1.0, 1.0] #initial constraints 
-t = np.arange(0.0, 40.0, 0.01) #sets time to intervals of .01 from 0-40
-
-#diff eq solver. func f subject to state0 initialization at time int t
-
-states = odeint(f, state0, t) 
-
-# fig = plt.figure()
-# ax = fig.gca(projection="3d")
-# ax.plot(states[:, 0], states[:, 1], states[:, 2])
-# plt.draw()
-# plt.show()
-
-
-#4th order runge kutta is (cred to https://mathworld.wolfram.com/Runge-KuttaMethod.html)
-# k_1	=	hf(x_n,y_n)	
-# k_2	=	hf(x_n+1/2h,y_n+1/2k_1)	
-# k_3	=	hf(x_n+1/2h,y_n+1/2k_2)	
-# k_4	=	hf(x_n+h,y_n+k_3)	
-# y_(n+1)	=	y_n+1/6k_1+1/3k_2+1/3k_3+1/6k_4+O(h^5)
-
-
-#https://lpsa.swarthmore.edu/NumInt/NumIntFourth.html
-
-
-#need to deal with fn, how to make all soln based on fn using x,y,z not just one var
-def rk(fn, trange, y0, h): 
-    i= int((trange[0]-trange[1])/h * -1)
+def rk(trange, y0, h):   
+    i= int((trange[0]-trange[len(trange)-1])/h * -1)
     time_val = np.zeros(i+1)
-    y = np.zeros((i+1, len(y0)))
 
-    #initialize the time_val and y solutions
-    y[0,:] = y0
+    val = np.zeros((i+1, len(y0)))
+
+    #initialize the time_val and s solutions
+    val[0,0] = y0[0]
+    val[0,1] = y0[1]
+    val[0,2] = y0[2]
+
     time_val[0] = trange[0]
 
     for t in range(0, i) :
-        k1 = fn(time_val[t], y[t,:])
-        k2 = fn(time_val[t]+ (h*k1/2), y[t,:] + (h/2)  )
-        k3 = fn(time_val[t]+ (h*k2/2), y[t,:] + (h/2)  )
-        k4 = fn(time_val[t]+ (h*k3), y[t,:] + h)
+        k1x = h*fx(time_val[t], val[t,:])
+        k1y = h*fy(time_val[t], val[t,:])
+        k1z = h*fz(time_val[t], val[t,:])
+
+        val[t, 0] = val[t,0] + (k1x/2)
+        val[t, 1] = val[t,1] + (k1y/2)
+        val[t, 2] = val[t,2] + (k1z/2)
+
+        k2x = h*fx(time_val[t]+ h, val[t,:])
+        k2y = h*fy(time_val[t]+ h, val[t,:])
+        k2z = h*fz(time_val[t]+ h, val[t,:])
+
+        val[t, 0] = val[t,0] + (k2x/2)
+        val[t, 1] = val[t,1] + (k2y/2)
+        val[t, 2] = val[t,2] + (k2z/2)
+
+        k3x = h*fx(time_val[t]+ h, val[t,:])
+        k3y = h*fy(time_val[t]+ h, val[t,:])
+        k3z = h*fz(time_val[t]+ h, val[t,:])
+
+        val[t, 0] = val[t,0] + (k3x/2)
+        val[t, 1] = val[t,1] + (k3y/2)
+        val[t, 2] = val[t,2] + (k3z/2)
+
+        k4x = h*fx(time_val[t]+ h, val[t,:])
+        k4y = h*fy(time_val[t]+ h, val[t,:])
+        k4z = h*fz(time_val[t]+ h, val[t,:])
+
 
         time_val[t+1] = time_val[t] + h
-        y[t+1] = y[t] + h*(k1 + 2*k2 + 2*k3 + k4)/6
 
-    return time_val
+        val[t+1, 0] = val[t, 0] + h*(1/6)*(k1x + k2x + k3x + k4x)
+        val[t+1, 1] = val[t, 1] + h*(1/6)*(k1y + k2y + k3y + k4y)
+        val[t+1, 2] = val[t, 2] + h*(1/6)*(k1z + k2z + k3z + k4z)
 
+
+    return time_val, val
+
+
+def fx(t, state):
+    x, y, z = state  # Unpack the state vector
+    return sigma * (y - x) # Derivatives
+
+def fy(t, state):
+    x, y, z = state  # Unpack the state vector
+    return  x * (rho - z) - y  # Derivatives
+
+def fz(t, state):
+    x, y, z = state  # Unpack the state vector
+    return x * y - beta * z  # Derivatives
+
+state0 = [1.0, 1.0, 1.0] #initial constraints 
+t = np.arange(0.0, 40.0, 0.1) #sets time to intervals of .01 from 0-40
+
+times, val = rk(t, state0, 0.01)
+
+fig = plt.figure()
+ax = fig.gca(projection="3d")
+ax.plot(val[:, 0], val[:, 1], val[:, 2])
+plt.draw()
+plt.show()
 
