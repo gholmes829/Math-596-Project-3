@@ -12,6 +12,8 @@ class Driver:
 		"""
 		Has attributes like number of oberserved vars and stuf like that
 		"""	
+		self.agents = 100
+
 		rho, sigma, beta = 28.0, 10.0, 8.0 / 3.0
 		self.lorenz = np.array([
 			lambda t, state: sigma * (state[1]-state[0]),
@@ -20,7 +22,7 @@ class Driver:
 			])
 
 		self.observations = np.array(list(product([0, 1], repeat=3)))[1:]  # 3d combinations of [1, 0] excluding [0, 0, 0]
-		self.filter = KalmanEnsemble(self.lorenz, rungeKutta, self.observations[4])
+		self.filter = KalmanEnsemble(self.agents, self.lorenz, rungeKutta, self.observations[4])
 
 	def run(self) -> None:
 		"""

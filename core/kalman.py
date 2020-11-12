@@ -10,9 +10,21 @@ class KalmanEnsemble:
 		self.model = model
 		self.solver = solver
 		self.observations = observations
-	
-		self.state = None
+
+		
+		# SOMEONE PLEASE CHECK, IDK IF THESE ARE RIGHT
+		#initialize
 		self.H = np.array([[int(n == m) for n in range(3)] for m in range(3) if observations[m]])	
+		self.v = np.zeros((2, self.model.shape[0]))
+		self.y = np.zeros((2, self.H.shape[0]))		
+
+		# prediction
+		self.m = np.zeros(self.v.shape[0])
+		self.C = np.zeros((self.v.shape[0], self.model.shape[0]))
+		
+		# analysis
+		self.S = np.zeros((self.model.shape[0], self.model.shape[0]))
+		self.K = np.zeros((self.v.shape[0],  self.model.shape[0]))
 
 	def predict(self):
 		pass
