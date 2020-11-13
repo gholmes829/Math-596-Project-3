@@ -14,7 +14,7 @@ class Driver:
 		Has attributes like number of oberserved vars and stuf like that
 		"""	
 		# initializing
-		self.n = 100
+		self.n = 10
 		self.step = 0.01
 		self.iterations = int(self.n/self.step)-1
 
@@ -31,7 +31,7 @@ class Driver:
 		self.observationProduct = np.array(list(product([0, 1], repeat=3)))[1:]  # 3d combinations of [1, 0] excluding [0, 0, 0]
 
 		# filter
-		self.members = 5
+		self.members = 15
 		self.kalmanFilter = EnKF(self.lorenz, self.y0, self.beta, members=self.members)
 
 		# logging
@@ -42,10 +42,11 @@ class Driver:
 		"""
 		Runs program with pre configured parameters
 		"""
-		observation = [1, 1, 1]  # example for observing x and z
+		observation = [1, 1, 0]  # example for observing x and z
 		H = np.array([[int(n == m) for n in range(3)] for m in range(3) if observation[m]])
 		
 		for t in range(self.iterations):
+			print(t,"/",self.iterations," (",round(100*t/self.iterations, 3),"%)")
 			y = H @ self.truth[t]
 			self.kalmanFilter.predict(self.beta)
 			self.kalmanFilter.update(y, H, self.alpha)
