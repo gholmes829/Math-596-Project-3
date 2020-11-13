@@ -26,7 +26,7 @@ def RK4(df: np.ndarray, y0: np.ndarray, trange: tuple, h: float) -> (np.ndarray,
 			k[1][j] = h*df[j](t[i] + 0.5*h, f[i,:] + 0.5*k[0][j])
 			k[2][j] = h*df[j](t[i] + 0.5*h, f[i,:] + 0.5*k[1][j])
 			k[3][j] = h*df[j](t[i] + h, f[i,:] + k[2][j])
-			f[i+1, j] = f[i, j] + (1/6)*(k[0][j]+k[1][j]+2*k[2][j]+2*k[3][j])
+			f[i+1, j] = f[i, j] + (1/6)*(k[0][j]+2*k[1][j]+2*k[2][j]+k[3][j])
 		t[i+1] = t[i] + h
 
 	return t, f
