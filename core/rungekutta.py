@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 class LorenzSolver:
+	"""
+
+	"""
 	def __init__(self, h: int=0.01) -> None:
 		self.h = h
 		rho, sigma, beta = 28.0, 10.0, 8.0/3.0
@@ -13,6 +16,11 @@ class LorenzSolver:
 			])
 	
 	def __call__(self, state: np.ndarray, n: int=1) -> any:
+		"""
+		Example:
+		solver = LorenzSolver()
+		t, f = solver([1., 1., 1.], 100) 
+		"""
 		if n==1:
 			return RK4(self.df, state, self.h)
 		else:
@@ -31,10 +39,8 @@ def RK4(df: np.ndarray, y0: np.ndarray, h: float, trange: tuple=()) -> any:
 	"""
 	n = int((trange[1]-trange[0])/h)-1 if trange != () else 1
 	dimensions = y0.shape[0]
-	#print(trange==())
 	k = [[0 for dimension in range(dimensions)] for order in range(4)]
 	t, f = np.zeros(n+1), np.zeros((n+1, dimensions))
-	#print(t.shape, f.shape, trange, y0)
 	t[0], f[0] = trange[0] if trange != () else 0, y0
 	
 	for i in range(n):
