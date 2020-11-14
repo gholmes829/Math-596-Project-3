@@ -7,6 +7,7 @@ class EnKF:
 	def __init__(self, model, v0, beta, members: int=100) -> None:
 		"""
 		agents: number of ensemble members
+		beta: initial condition error
 		"""
 		self.model = model
 		self.members = members

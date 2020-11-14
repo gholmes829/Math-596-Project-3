@@ -14,12 +14,12 @@ class Driver:
 		Has attributes like number of oberserved vars and stuf like that
 		"""	
 		# initializing
-		self.n = 10
+		self.n = 15
 		self.step = 0.01
 		self.iterations = int(self.n/self.step)-1
 
 		# noise
-		self.alpha, self.beta = 0.01, 0.01  # can switch bt 0.01, 0.1, and 1
+		self.alpha, self.beta = 0.01, 0.01  # can switch bt 0.01, 0.1, and 1. Beta is model error and alpha is observation error.
 	
 		# model
 		self.lorenz = LorenzSolver(self.step)
@@ -32,7 +32,7 @@ class Driver:
 
 		# filter
 		self.members = 15
-		self.kalmanFilter = EnKF(self.lorenz, self.y0, self.beta, members=self.members)
+		self.kalmanFilter = EnKF(self.lorenz, self.y0, self.beta, members=self.members)  # beta is initial condition error
 
 		# logging
 		self.states = np.zeros((self.iterations, 3))  # mean
@@ -42,18 +42,21 @@ class Driver:
 		"""
 		Runs program with pre configured parameters
 		"""
-		observation = [1, 1, 0]  # example for observing x and z
+		observation = [1, 0, 1]  # example for observing x and z
 		H = np.array([[int(n == m) for n in range(3)] for m in range(3) if observation[m]])
-		
+		printed = -1		
+
 		for t in range(self.iterations):
-			print(t,"/",self.iterations," (",round(100*t/self.iterations, 3),"%)")
+			if int(100*(t+1)/self.iterations)%5==0 and int(100*(t+1)/self.iterations) != printed:
+				print((t+1),"/",self.iterations," ",int(100*(t+1)/self.iterations),"%")
+				printed = int(100*(t+1)/self.iterations)
 			y = H @ self.truth[t]
 			self.kalmanFilter.predict(self.beta)
 			self.kalmanFilter.update(y, H, self.alpha)
 
 			self.states[t] = self.kalmanFilter.m_hat
 			self.covariances[t] = self.kalmanFilter.C_hat
-
+		print("\nDone!")
 		# plotting
 	
 		# kalman produced graph
