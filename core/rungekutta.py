@@ -1,10 +1,14 @@
+"""
+Using RK4 to solve ODEs.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 class LorenzSolver:
 	"""
-
+	Solve '63 Lorenz equation
 	"""
 	def __init__(self, h: int=0.01) -> None:
 		self.h = h
@@ -51,8 +55,7 @@ def RK4(df: np.ndarray, y0: np.ndarray, h: float, trange: tuple=()) -> any:
 			k[3][j] = h*df[j](t[i] + h, f[i,:] + k[2][j])
 			f[i+1, j] = f[i, j] + (1/6)*(k[0][j]+2*k[1][j]+2*k[2][j]+k[3][j])
 		t[i+1] = t[i] + h
-
-	return t if trange!=() else 0, f if trange!=() else f[0]
+	return (t, f) if trange!=() else (0, f[1])
 
 def plotLorenzAttractor() -> None:
 	"""
@@ -66,7 +69,7 @@ def plotLorenzAttractor() -> None:
 		])
 
 	y0 = np.array([1., 1., 1.])
-	trange = (0., 40.)
+	trange = (0., 30.)
 	t, f = RK4(lorenz, y0, 0.01, trange)
 	
 	fig = plt.figure()
