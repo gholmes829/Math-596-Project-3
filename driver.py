@@ -122,7 +122,7 @@ class Driver:
 
 			plt.tight_layout()	
 			fig.set_size_inches(15, 15)
-			plt.savefig("figures/" + str(observation[0]) + str(observation[1]) + str(observation[2]), bbox_inches="tight")		
+			#plt.savefig("figures/" + str(observation[0]) + str(observation[1]) + str(observation[2]), bbox_inches="tight")		
 	
 			self.kalmanFilter = EnKF(self.lorenz, self.y0, self.gamma, members=self.members)
 		data = {}
@@ -149,9 +149,9 @@ class Driver:
 		plt.grid()
 		plt.title("RMSE vs Variables Observed") 
 
-		#self.plot()
-		#plt.show()
-		plt.savefig("figures/" + "RMSE", bbox_inches="tight")
+		self.plot()
+		plt.show()
+		#plt.savefig("figures/" + "RMSE", bbox_inches="tight")
 
 	def plot(self):
 		# kalman produced graph
