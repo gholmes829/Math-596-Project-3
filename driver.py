@@ -57,10 +57,13 @@ class Driver:
 		self.states = np.zeros((self.iterations, 3))  # mean
 		self.covariances = np.zeros((self.iterations, 3, 3))  # C
 
+		self.RMSE = []
+
 	def run(self) -> None:
 		"""
 		Runs program with sample settings.
 		"""
+		print("Running...\n")
 		for observation in self.observationProduct:
 			H = np.array([[int(n == m) for n in range(3)] for m in range(3) if observation[m]])
 			printed = -1		
@@ -77,25 +80,48 @@ class Driver:
 
 				self.states[t] = self.kalmanFilter.m_hat
 				self.covariances[t] = self.kalmanFilter.C_hat
+			self.RMSE.append(RMSE(self.state, self.truth))
 		
 			print("\nDone!")
 		
 			# plotting
 			varMap = {0: "x", 1: "y", 2: "z"}			
 
-			fig, axes = plt.subplots(4, sharex=True)
+			fig, axes = plt.subplots(5, sharex=True, gridspec_kw={"hspace": 0.25})
+			uncertainties = np.zeros((self.iterations, 3))
 			for i in range(3):
-				axes[i].plot(self.t, self.truth[:,i], c="blue", ms=5)
-				axes[i].plot(self.t, self.states[:,i], ".", ms=2.5, c="red", alpha=0.5)
-				axes[i].title.set_text("Coord: " + varMap[i])
+				predictions = self.states[:,i]
+
+				selector = np.array([int(i==j) for j in range(3)])
+				uncertainty = np.array([selector.T @ cov @ selector for cov in self.covariances])
+			
+				for j in range(self.iterations):
+					uncertainties[j][i] = uncertainty[j]
+				
+				axes[i].plot(self.t, self.truth[:,i], c="cyan", linewidth=4, label="truth")
+				axes[i].plot(self.t, predictions, ".", ms=6, c="red", label="prediction")
+
+				axes[i].title.set_text("Component: " + varMap[i])
+				axes[i].set_ylabel("f(t)")
+				axes[i].legend(loc="upper right")
 				axes[i].grid()	
 			
-			axes[3].plot(self.t, [dist(self.states[i], self.truth[i]) for i in range(self.iterations)], c="green")
-			axes[3].set_xlabel("Time")
+			error = np.array([dist(self.states[i], self.truth[i]) for i in range(self.iterations)])
+			uncertainty = np.array([dist(np.zeros(3), uncertainties[i]) for i in range(self.iterations)])
+
+			axes[3].plot(self.t, error, c="green", linewidth=4)
 			axes[3].set_ylabel("2-Norm")
-			plt.tight_layout()
-			plt.grid()	
-			fig.set_size_inches(12, 6)
+			axes[3].title.set_text("Error")
+			axes[3].grid()
+
+			axes[4].plot(self.t, uncertainty, c="magenta", linewidth=4)
+			axes[4].set_xlabel("Time")
+			axes[4].set_ylabel("2-Norm")
+			axes[4].title.set_text("Uncertainty")
+			axes[4].grid()
+
+			plt.tight_layout()	
+			fig.set_size_inches(15, 15)
 			plt.savefig("figures/" + str(observation[0]) + str(observation[1]) + str(observation[2]), bbox_inches="tight")		
 			#self.plot()
 			#plt.show()
