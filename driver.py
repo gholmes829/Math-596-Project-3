@@ -57,14 +57,14 @@ class Driver:
 		self.states = np.zeros((self.iterations, 3))  # mean
 		self.covariances = np.zeros((self.iterations, 3, 3))  # C
 
-		self.RMSE = []
+		self.RMSE = np.zeros(7)
 
 	def run(self) -> None:
 		"""
 		Runs program with sample settings.
 		"""
 		print("Running...\n")
-		for observation in self.observationProduct:
+		for count, observation in enumerate(self.observationProduct):
 			H = np.array([[int(n == m) for n in range(3)] for m in range(3) if observation[m]])
 			printed = -1		
 			print("Generating with observation: " + str(observation))
@@ -80,12 +80,12 @@ class Driver:
 
 				self.states[t] = self.kalmanFilter.m_hat
 				self.covariances[t] = self.kalmanFilter.C_hat
-			self.RMSE.append(RMSE(self.state, self.truth))
+			self.RMSE[count] = RMSE(self.states, self.truth)
 		
 			print("\nDone!")
 		
 			# plotting
-			varMap = {0: "x", 1: "y", 2: "z"}			
+			varMap = {0: "x", 1: "y", 2: "z"} 			
 
 			fig, axes = plt.subplots(5, sharex=True, gridspec_kw={"hspace": 0.25})
 			uncertainties = np.zeros((self.iterations, 3))
@@ -122,11 +122,36 @@ class Driver:
 
 			plt.tight_layout()	
 			fig.set_size_inches(15, 15)
-			plt.savefig("figures/" + str(observation[0]) + str(observation[1]) + str(observation[2]), bbox_inches="tight")		
-			#self.plot()
-			#plt.show()
+			#plt.savefig("figures/" + str(observation[0]) + str(observation[1]) + str(observation[2]), bbox_inches="tight")		
 	
-			self.kalmanFilter = EnKF(self.lorenz, self.y0, self.gamma, members=self.members) 
+			self.kalmanFilter = EnKF(self.lorenz, self.y0, self.gamma, members=self.members)
+		data = {}
+		for key, val in zip(self.observationProduct, self.RMSE):
+			temp = tuple([varMap[c] for c, val in enumerate(key) if val])
+			ind = "("
+			for el in temp:
+				ind+=el+", "
+			ind = ind[:-2]
+			ind+=")"
+			data[ind] = val 
+		keys = np.array(list(data.keys()))
+		values = np.array(list(data.values())) 
+
+		order = values.argsort()
+		values = values[order]
+		keys = keys[order]
+		   
+		fig = plt.figure(figsize = (10, 5)) 
+		plt.bar(keys, values, color="red", width = 0.4) 
+		  
+		plt.xlabel("Observations") 
+		plt.ylabel("RMSE") 
+		plt.grid()
+		plt.title("RMSE vs Variables Observed") 
+
+		self.plot()
+		plt.show()
+		#plt.savefig("figures/" + "RMSE", bbox_inches="tight")
 
 	def plot(self):
 		# kalman produced graph

@@ -61,6 +61,9 @@ def plotLorenzAttractor() -> None:
 	"""
 	Plots solutions to Lorenz Attractor using 4th order Runge Kutta.
 	"""
+	plt.style.use(["dark_background"])
+	plt.rc("grid", linestyle="dashed", color="white", alpha=0.25)
+
 	rho, sigma, beta = 28.0, 10.0, 8.0/3.0
 	lorenz = np.array([
 			lambda t, state: sigma * (state[1]-state[0]),
@@ -74,7 +77,7 @@ def plotLorenzAttractor() -> None:
 	
 	fig = plt.figure()
 	ax = fig.gca(projection="3d")
-	ax.plot(*f.T)
+	ax.plot(*f.T, c="red")
 	plt.draw()
 	plt.show()
 
